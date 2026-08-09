@@ -990,7 +990,7 @@
   <!-- ROS 2 Control Hardware Interface for Ignition -->
   <ros2_control name="PetBotSystem" type="system">
     <hardware>
-       <plugin>ign_ros2_control/IgnitionSystem</plugin>
+       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
 
     <!-- Front Left Leg -->
@@ -1244,7 +1244,8 @@
   </transmission>
 
   <gazebo>
-    <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+
           <parameters>$(find pet_bot_test5)/config/pet_bot_controllers.yaml</parameters>
     </plugin>
   </gazebo>
