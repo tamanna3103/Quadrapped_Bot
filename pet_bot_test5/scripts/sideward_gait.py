@@ -14,11 +14,11 @@ L2 = 0.08
 # GAIT PARAMETERS
 # ============================================================
 RATE = 50.0
-CYCLE_TIME = 0.8
+CYCLE_TIME = 1.4#0.8
 
-STEP_HEIGHT = 0.025
-BODY_HEIGHT = 0.17
-SIDE_STEP = 0.03
+STEP_HEIGHT = 0.03 # 0.025
+BODY_HEIGHT = 0.17 #0.17
+SIDE_STEP = 0.03# 0.03
 
 STARTUP_HOLD = 1.0
 
@@ -74,19 +74,34 @@ def leg_ik_3d(x, y, z):
 # ============================================================
 # SIDEWAYS FOOT TRAJECTORY
 # ============================================================
-def foot_position(s, swing,leg):
-
+def foot_position(s, swing,leg,DIRECTION):
     if swing:
-        # swing phase
-        y = -SIDE_STEP/2 + SIDE_STEP * s
-        z = BODY_HEIGHT - STEP_HEIGHT * math.sin(math.pi * s)
+
+        if DIRECTION == 1:
+
+            if leg in SWING_A:
+                y = -SIDE_STEP/4 + SIDE_STEP*s
+
+            elif leg in SWING_B:
+                y = -(-SIDE_STEP/2 + SIDE_STEP*s)
+
+        elif DIRECTION == -1:
+
+            if leg in SWING_A:
+                y = -(-SIDE_STEP/2 + SIDE_STEP*s)
+
+            elif leg in SWING_B:
+                y = (-SIDE_STEP/4 + SIDE_STEP*s)
+
+        z = BODY_HEIGHT - STEP_HEIGHT * math.sin(math.pi*s)
+   
 
     else:
         # stance phase (push body)
         y = SIDE_STEP/2 - SIDE_STEP * s
         z = BODY_HEIGHT
 
-    x = 0.02
+    x = 0.02#0.02
     y = y
 
     return x, y, z
@@ -106,6 +121,12 @@ class SideWalk(Node):
 
         self.t0 = self.get_clock().now().nanoseconds * 1e-9
         self.timer = self.create_timer(1.0 / RATE, self.update)
+
+        self.stance_x = {leg: 0.0 for leg in LEGS}
+        self.stance_z = {leg: BODY_HEIGHT for leg in LEGS}
+        self.stance_y = {leg: 0.0 for leg in LEGS}
+        self.prev_swing = {leg: False for leg in LEGS}
+
 
         self.get_logger().info("Sideways walking started")
 
@@ -165,14 +186,25 @@ class SideWalk(Node):
 
             swing = leg in swing_legs
 
-            x, y, z = foot_position(s, swing,leg)
+            x, y, z = foot_position(s, swing,leg,DIRECTION)
 
-            if leg in ["FR", "RR"]:
-                y = DIRECTION*y
+            if not swing:
+                if self.prev_swing[leg]:
+                    self.stance_x[leg] = x
+                    self.stance_z[leg] = z  
+                    self.stance_y[leg] = y 
+                    
+                x = self.stance_x[leg]
+                z = self.stance_z[leg]
+                y = self.stance_y[leg]
+
+
+            # if leg in ["FR", "RR"]:
+            #     y = DIRECTION*y
 
             hip_ik, thigh_ik, knee_ik = leg_ik_3d(x, y, z)
 
-            hip   = DIRECTION * HIP_SIGN[leg] * hip_ik
+            hip   = HIP_SIGN[leg] * hip_ik
             thigh = THIGH_SIGN[leg] * thigh_ik
             knee  = KNEE_SIGN[leg]  * knee_ik
 
@@ -181,6 +213,8 @@ class SideWalk(Node):
             cmd[idx+0] = hip
             cmd[idx+1] = thigh
             cmd[idx+2] = knee
+
+            self.prev_swing[leg] = swing
 
         msg = Float64MultiArray()
         msg.data = cmd

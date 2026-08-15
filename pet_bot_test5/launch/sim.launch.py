@@ -93,23 +93,78 @@ def generate_launch_description():
         ],
         output="screen"
     )
-
-    camera_bridge = Node(
-        package="ros_gz_bridge",
-        executable="parameter_bridge",
-        arguments=[
-            "/depth_camera@sensor_msgs/msg/Image@ignition.msgs.Image"
-        ],
-        output="screen"
+    pet_bot_test5_gazebo = get_package_share_directory("pet_bot_test5")
+    pet_bot_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='rover_bridge',
+        parameters=[{
+            'config_file': os.path.join(pet_bot_test5_gazebo, 'config', 'bridge.yaml'),
+            'qos_overrides./tf_static.publisher.durability': 'transient_local',
+            'use_sim_time': True
+        }],
+        output='screen'
     )
 
-    point_cloud_bridge = Node(
-        package="ros_gz_bridge",
-        executable="parameter_bridge",
-        arguments=[
-            "/depth_camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked"
-        ],
-        output="screen"
+    # camera_bridge = Node(
+    #     package="ros_gz_bridge",
+    #     executable="parameter_bridge",
+    #     arguments=[
+    #         "/depth_camera@sensor_msgs/msg/Image@ignition.msgs.Image"
+    #     ],
+    #     output="screen"
+    # )
+
+    # point_cloud_bridge = Node(
+    #     package="ros_gz_bridge",
+    #     executable="parameter_bridge",
+    #     arguments=[
+    #         "/depth_camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked"
+    #     ],
+    #     output="screen"
+    # )
+
+    camera_bridge = TimerAction(
+        period=5.0,
+        actions=[
+            Node(
+                package="ros_gz_bridge",
+                executable="parameter_bridge",
+                name="rover_gz_bridge",
+                # namespace="rover",  # Add namespace for bridge
+                arguments=[
+                    # "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
+                    "/camera/image@sensor_msgs/msg/Image@ignition.msgs.Image",
+                    "/camera/depth_image@sensor_msgs/msg/Image@ignition.msgs.Image",
+                    "/camera/camera_info@sensor_msgs/msg/CameraInfo@ignition.msgs.CameraInfo",
+                    "/camera/points@sensor_msgs/msg/PointCloud2@ignition.msgs.PointCloudPacked",
+                ],
+                remappings=[
+                    ("/camera/image", "/camera/image_raw"),
+                    ("/camera/depth_image", "/camera/depth/image_raw"),
+                    ("/camera/camera_info", "/camera/camera_info"),
+                    ("/camera/points", "/camera/depth/points"),
+                ],
+                output="screen",
+                parameters=[{"use_sim_time": True}],
+            )
+        ]
+    )
+
+
+    camera_info_relay = TimerAction(
+        period=15.0,
+        actions=[
+            Node(
+                package='topic_tools',
+                executable='relay',
+                name='camera_info_relay',
+                # namespace='rover',  # Add namespace for relay
+                arguments=['/camera/camera_info', '/camera/depth/camera_info'],
+                output='screen',
+                parameters=[{"use_sim_time": True}],
+            )
+        ]
     )
 
 
@@ -122,5 +177,7 @@ def generate_launch_description():
         load_forward_position_controller,
         bridge,
         camera_bridge,
-        point_cloud_bridge
+        # point_cloud_bridge,
+        camera_info_relay,
+        pet_bot_bridge,
     ])
