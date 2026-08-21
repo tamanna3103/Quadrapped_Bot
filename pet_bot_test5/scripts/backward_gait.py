@@ -207,7 +207,8 @@ class HybridIKTrot_Backward(Node):
 
 # ============================================================
 def main():
-    steps = int(input("Enter number of steps: "))
+    #steps = int(input("Enter number of steps: "))
+    steps =1000
     rclpy.init()
     node = HybridIKTrot_Backward(steps)
     rclpy.spin(node)

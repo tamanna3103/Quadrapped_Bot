@@ -154,7 +154,8 @@ class HybridIKTrot(Node):
 
 # ============================================================
 def main():
-    steps = int(input("Enter number of steps: "))
+    #steps = int(input("Enter number of steps: "))
+    steps =1000
     rclpy.init()
     node = HybridIKTrot(steps)
     rclpy.spin(node)

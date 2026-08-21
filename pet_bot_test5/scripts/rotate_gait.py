@@ -17,7 +17,7 @@ RATE = 50.0
 CYCLE_TIME = 1.4#0.8
 
 STEP_HEIGHT = 0.03 # 0.025
-BODY_HEIGHT = 0.17 #0.17
+BODY_HEIGHT = 0.16 #0.17
 SIDE_STEP = 0.03# 0.03
 
 STARTUP_HOLD = 1.0
@@ -31,6 +31,7 @@ LEG_INDEX = {"FL": 0, "FR": 3, "RL": 6, "RR": 9}
 
 SWING_A = ["FL", "RL"]
 SWING_B = ["FR", "RR"]
+ROTATE = ["FL", "FR"]
 
 # ============================================================
 # JOINT SIGN CORRECTIONS (VERY IMPORTANT)
@@ -79,22 +80,42 @@ def foot_position(s, swing,leg,DIRECTION):
 
         if DIRECTION == 1:
 
-            if leg in SWING_A:
-                y = -SIDE_STEP/4 + SIDE_STEP*s
+            if leg == "FR":
+                y = -(-SIDE_STEP/1.5 + (SIDE_STEP)*(s) )
+            
+            elif leg == "RR" :
+                x = (-SIDE_STEP/4 + SIDE_STEP*s)
+                y = 0.0
+            
+            elif leg == "FL":
+                x = -(-SIDE_STEP/4 + SIDE_STEP*s)
+                y = 0.0
+            
+            elif leg == "RL":
+                y = -(-SIDE_STEP/1.5 + (SIDE_STEP)*(s) )
 
-            elif leg in SWING_B:
-                y = -(-SIDE_STEP/2 + SIDE_STEP*s)
+            
 
         elif DIRECTION == -1:
 
-            if leg in SWING_A:
-                y = -(-SIDE_STEP/2 + SIDE_STEP*s)
+            if leg == "FL":
+                y = -(-SIDE_STEP/2.1 + (SIDE_STEP)*(s) )
 
-            elif leg in SWING_B:
-                y = (-SIDE_STEP/4 + SIDE_STEP*s)
+            elif leg == "RL" :
+                x = (-SIDE_STEP/4.1 + SIDE_STEP*s)
+                y = 0.0
 
+            elif leg == "FR":
+                x = -(-SIDE_STEP/4.1 + SIDE_STEP*s)
+                y = 0.0
+
+            elif leg == "RR":
+                y = -(-SIDE_STEP/2.1 + (SIDE_STEP)*(s) )
+
+
+        
         z = BODY_HEIGHT - STEP_HEIGHT * math.sin(math.pi*s)
-   
+        
 
     else:
         # stance phase (push body)
@@ -235,7 +256,7 @@ class SideWalk(Node):
 # ============================================================
 def main():
     #steps = int(input("Enter number of sideways steps: "))+1
-    steps =1000
+    steps = 1000
     direction=int(input("Enter direction \n" \
                         "Left=1\n" \
                         "Right=-1\n" \

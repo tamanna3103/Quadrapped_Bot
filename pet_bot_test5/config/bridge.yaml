@@ -37,12 +37,12 @@
   gz_type_name: "ignition.msgs.LaserScan"
   direction: GZ_TO_ROS
 
-# # IMU Bridge
-# - ros_topic_name: "/imu"
-#   gz_topic_name: "/imu"
-#   ros_type_name: "sensor_msgs/msg/Imu"
-#   gz_type_name: "ignition.msgs.IMU"
-#   direction: GZ_TO_ROS
+# IMU Bridge
+- ros_topic_name: "/imu"
+  gz_topic_name: "/imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "ignition.msgs.IMU"
+  direction: GZ_TO_ROS
 
 # - gz_topic_name: "/world/eyantra_world/time"
 #   ros_topic_name: "/_ros_status"
